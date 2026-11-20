@@ -48,40 +48,41 @@ export class GraficoBarraVerticalComponent implements OnDestroy {
   //   lo que da el efecto de relleno semitransparente con borde sólido.
   // *************************************************************************
   private render(data: Restaurante[], canvas: HTMLCanvasElement) {
-    // TODO: elimina la gráfica anterior antes de volver a pintar cuando
+    //TODO: elimina la gráfica anterior antes de volver a pintar cuando
     // el efecto reciba datos nuevos.
+    this.chart?.destroy();
 
-    // TODO: 'counts' debe guardar una entrada por territorio. Usa el
+    //TODO: 'counts' debe guardar una entrada por territorio. Usa el
     // territorio como clave y reserva un número para acumular restaurantes mediante Map.
-    const counts = null;
+    const counts = new Map<string, number>();
     data.forEach(r => {
-      // TODO: extrae de cada restaurante el territorio que quieres dibujar -> campo territory
+      //TODO: extrae de cada restaurante el territorio que quieres dibujar -> campo territory
       // como categoría. Decide cómo tratar los valores vacíos o inexistentes.
-      const territorio = null;
-      // TODO: recupera el contador de ese territorio, suma el restaurante
+      const territorio = r.territory?.trim() || 'Desconocido';
+      //TODO: recupera el contador de ese territorio, suma el restaurante
       // actual y guarda de nuevo el resultado asociado a la misma clave.
-      
+      counts.set(territorio, (counts.get(territorio) ?? 0) + 1);
     });
 
-    // TODO: convierte los grupos en una lista ordenable. Cada entrada
+    //TODO: convierte los grupos en una lista ordenable. Cada entrada
     // conserva el nombre del territorio y el número que debe medir la barra.
     // Elige un criterio de orden que facilite la comparación visual ((a, b) => b[1] - a[1]).
-    const sorted = null;
+    const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
 
-    // TODO: crea la gráfica en el canvas y construye la configuración de
+    //TODO: crea la gráfica en el canvas y construye la configuración de
     // Chart.js haciendo corresponder cada etiqueta con su valor numérico.
     this.chart = new Chart(canvas, {
       type: 'bar',
       data: {
-        // TODO: las etiquetas forman las categorías del eje horizontal.
-        labels: [],
+        //TODO: las etiquetas forman las categorías del eje horizontal.
+        labels: sorted.map(e => e[0]),
         datasets: [{
           label: 'Restaurantes',
-          // TODO: los valores deben estar en el mismo orden que las
+          //TODO: los valores deben estar en el mismo orden que las
           // etiquetas: el primer valor corresponde a la primera categoría.
-          data: [],
-          backgroundColor: [], //CHART_PALETTE[i % CHART_PALETTE.length] + 'bb')
-          borderColor: [], //CHART_PALETTE[i % CHART_PALETTE.length]
+          data: sorted.map(e => e[1]),
+          backgroundColor: sorted.map((_, i) => CHART_PALETTE[i % CHART_PALETTE.length] + 'bb'),
+          borderColor: sorted.map((_, i) => CHART_PALETTE[i % CHART_PALETTE.length]),
           borderWidth: 2,
           // borderRadius: redondea las esquinas superiores de cada barra
           borderRadius: 8,
@@ -90,7 +91,7 @@ export class GraficoBarraVerticalComponent implements OnDestroy {
         }]
       },
       options: {
-        // TODO: revisa qué ajustes hacen que el eje numérico comience en
+        //TODO: revisa qué ajustes hacen que el eje numérico comience en
         // cero y que las divisiones representen cantidades enteras.
         // responsive: true → la gráfica se redimensiona al cambiar el contenedor
         responsive: true,
@@ -101,7 +102,7 @@ export class GraficoBarraVerticalComponent implements OnDestroy {
           legend: { display: false },
           title: {
             display: true,
-            text: '',
+            text: 'Restaurantes por territorio',
             font: { size: 15, weight: 'bold' },
             color: '#333',
             padding: { bottom: 14 }
@@ -116,10 +117,18 @@ export class GraficoBarraVerticalComponent implements OnDestroy {
         scales: {
           //TODO: controlar los ticks, beginAtZero, grid... en los x e y si es necesario.
           y: {
-
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            },
+            grid: {
+              display: true
+            }
           },
           x: {
-
+            grid: {
+              display: false
+            }
           }
         }
       }
